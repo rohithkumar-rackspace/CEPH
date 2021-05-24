@@ -137,7 +137,15 @@ The Ceph client via librados connects directly to the primary OSD within an acti
 
 2.5. CEPH CRUSH RULESET:
 --------------------------
+- Ceph assigns a CRUSH ruleset to a pool. 
+- When a Ceph client stores or retrieves data in a pool, Ceph identifies the CRUSH ruleset, a rule within the rule
+  set, and the top-level bucket in the rule for storing and retrieving data. 
+- As Ceph processes the CRUSH rule, it identifies the primary OSD that contains the placement group for an object.
+- That enables the client to connect directly to the OSD, access the placement group and read or write object data.
 
+2.6. CEPH INPUT/OUTPUT OPERATIONS:
+----------------------------------
+- Ceph clients retrieve a 'Cluster Map' from a Ceph monitor, bind to a pool, and perform input/output(I/O) on objects within placement groups in the pool. 
 
 
 
