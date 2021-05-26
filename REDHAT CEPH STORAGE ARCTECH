@@ -89,7 +89,179 @@ Placement Groups:
 - a Ceph pool might store millions of data objects or more. 
 - Ceph must handle many types of operations, including data durability via replicas or erasure code chunks, data integrity by scrubbing or CRC checks, replication, 
   rebalancing and recovery. 
-- 
+- Ceph addresses this bottleneck by sharding a pool into placement groups.
+- The CRUSH algorithm computes the placement group for storing an object and computes the Acting Set of OSDs for the placement group. 
+- CRUSH puts each object into a placement group. Then, CRUSH stores each placement group in a set of OSDs.
+- System administrators set the placement group count when creating or modifying a pool.
+
+CRUSH Ruleset: 
+--------------
+CRUSH enables Ceph OSDs to store object copies across failure domains
+For example, copies of an object may get stored in different server rooms, aisles, racks and nodes. 
+If a large part of a cluster fails, such as a rack, the cluster can still operate in a degraded state until the cluster recovers.
+
+2.2.CEPH AUTHENTICATION:
+--------------------------
+- To identify users and protect against man-in-the-middle attacks, Ceph provides its cephx authentication system, which authenticates users and daemons.
+- Cephx uses shared secret keys for authentication, meaning both the client and the monitor cluster have a copy of the client’s secret key. 
+- The authentication protocol enables both parties to prove to each other that they have a copy of the key without actually revealing it
+- his provides mutual authentication, which means the cluster is sure the user possesses the secret key, and the user is sure that the cluster has a copy of the secret key.
+
+CEPHX: The cephx authentication protocol operates in a manner similar to Kerberos.
+------
+
+2.3. CEPH PLACEMENT GROUPS:
+----------------------------
+- Storing millions of objects in a cluster and managing them individually is resource intensive. So Ceph uses placement groups (PGs) to make managing a huge number of objects more efficient.
+- A PG is a subset of a pool that serves to contain a collection of objects. 
+- Ceph shards a pool into a series of PGs. 
+- Then, the CRUSH algorithm takes the cluster map and the status of the cluster into account and distributes the PGs evenly and pseudo-randomly to OSDs in the cluster.
+
+- When a system administrator creates a pool, CRUSH creates a user-defined number of PGs for the pool.
+- Ceph ensures against data loss by storing replicas of an object Since Ceph stores objects or erasure code chunks of an object within PGs,
+- Ceph replicates each PG in a set of OSDs called the "Acting Set" for each copy of an object or each erasure code chunk of an object.
+- A system administrator can determine the number of PGs in a pool and the number of replicas
+
+The CRUSH algorithm and PGs make Ceph dynamic. Changes in the cluster map or the cluster state may result in Ceph moving PGs from one OSD to another automatically.
+Examples:
+----------
+Expanding the Cluster & An OSD Fails
+By managing millions of objects within the context of hundreds to thousands of PGs, the Ceph storage cluster can grow, shrink and recover from failure efficiently.
+
+For Ceph clients, the CRUSH algorithm via librados makes the process of reading and writing objects very simple. A Ceph client simply writes an object to 
+a pool or reads an object from a pool. The primary OSD in the acting set can write replicas of the object or erasure code chunks of the object to the secondary 
+OSDs in the acting set on behalf of the Ceph client.
+
+The Ceph client via librados connects directly to the primary OSD within an acting set when writing and reading objects. Since I/O operations do not use a centralized broker, 
+network oversubscription is typically NOT an issue with Ceph.
+
+2.4. CEPH CRUSH RULESET
+-------------------------
+Ceph assigns a CRUSH ruleset to a pool.
+When a Ceph client stores or retrieves data in a pool, Ceph identifies the CRUSH ruleset, 
+As Ceph processes the CRUSH rule, it identifies the primary OSD that contains the placement group for an object. 
+That enables the client to connect directly to the OSD, access the placement group and read or write object data.
+
+To map placement groups to OSDs, a CRUSH map defines a hierarchical list of bucket types
+
+2.5. CEPH INPUT/OUTPUT OPERATIONS:
+-----------------------------------
+- Ceph clients retrieve a 'Cluster Map' from a Ceph monitor, bind to a pool, and perform input/output(I/O) on objects within placement groups in the pool. 
+- The pool’s CRUSH ruleset and the number of placement groups are the main factors that determine how Ceph will place the data. 
+- With the latest version of the cluster map, the client knows about all of the monitors and OSDs in the cluster and their current state.
+
+The only inputs required by the client are the object ID and the pool name. It is simple: Ceph stores data in named pools. 
+When a client wants to store a named object in a pool it takes the object name, a hash code, the number of PGs in the pool 
+and the pool name as inputs; then, CRUSH (Controlled Replication Under Scalable Hashing) calculates the ID of the placement 
+group and the primary OSD for the placement group.
+
+Ceph clients use the following steps to compute PG IDs:
+-------------------------------------------------------
+1. TheclientinputsthepoolIDandtheobjectID.Forexample,pool=liverpoolandobject-id= john.
+2. CRUSHtakestheobjectIDandhashesit.
+3. CRUSHcalculatesthehashmoduloofthenumberofPGstogetaPGID.Forexample,58.
+4. CRUSHcalculatestheprimaryOSDcorrespondingtothePGID.
+5. TheclientgetsthepoolIDgiventhepoolname.Forexample,thepool"liverpool"ispoolnumber 4.
+6. TheclientprependsthepoolIDtothePGID.Forexample,4.58.
+7. Theclientperformsanobjectoperationsuchaswrite,read,ordeletebycommunicatingdirectly
+with the Primary OSD in the Acting Set.
+
+2.6. CEPH REPLICATION:
+----------------------
+- Like Ceph clients, Ceph OSDs can contact Ceph monitors to retrieve the latest copy of the cluster map.
+- Ceph OSDs also use the CRUSH algorithm, but they use it to compute where to store replicas of objects
+- In a typical write scenario, a Ceph client uses the CRUSH algorithm to compute the placement group ID and the primary OSD in the Acting Set for an object.
+- When the client writes the object to the primary OSD, the primary OSD finds the number of replicas that it should store. 
+- The value is found in the osd_pool_default_size setting
+- primary osd replicates data to other osds as per ur replication count.
+
+Data copies:
+------------
+In a replicated storage pool, Ceph needs multiple copies of an object to operate in a degraded state. 
+Ideally, a Ceph storage cluster enables a client to read and write data even if one of the OSDs in an acting set fails. 
+For this reason, Ceph defaults to making three copies of an object with a minimum of two copies clean for write operations.
+Ceph will still preserve data even if two OSDs fail. However, it will interrupt write operations.
+
+2.7. CEPH ERASURE CODING:
+---------------------------
+
+
+2.8. CEPH OBJECTSTORE:
+----------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
