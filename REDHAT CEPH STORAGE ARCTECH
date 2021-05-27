@@ -275,6 +275,60 @@ This means that Ceph clients must be able to read and write data even when the c
 
 CHAPTER-3: CEPH CLIENT COMPONENTS:
 ===================================
+- Ceph clients differ in their materially in how they present data storage interfaces.
+- A Ceph block device presents block storage that mounts just like a physical storage drive
+- A Ceph gateway presents an object storage service with S3-compliant
+- Swift-compliant RESTful interfaces with its own user management
+
+all Ceph clients use the Reliable Autonomic Distributed Object Store (RADOS) protocol to interact with the Red Hat Ceph Storage cluster.
+
+They all have the same basic needs:
+----------------------------------
+The Ceph configuration file, and the Ceph monitor address. 
+The pool name.
+The user name and the path to the secret key.
+
+
+3.1.CEPH CLIENT NATIVE PROTOCOL:
+------------------------------------
+- The Ceph Storage Cluster provides a simple object storage interface with asynchronous communication capability. 
+- The interface provides direct, parallel access to objects throughout the cluster.
+
+Pool Operations 
+Snapshots 
+Read/Write Objects
+Create or Remove
+Entire Object or Byte Range 
+Append or Truncate
+Create/Set/Get/Remove XATTRs Create/Set/Get/Remove 
+Key/Value Pairs Compound operations and dual-ack semantics
+
+3.2. CEPH CLIENT OBJECT WATCH AND NOTIFY:
+-----------------------------------------
+- A Ceph client can register a persistent interest with an object and keep a session to the primary OSD open. 
+- The client can send a notification message and payload to all watchers and receive notification when the watchers receive the notification.
+- This enables a client to use any object as a synchronization/communication channel.
+
+3.3. CEPH CLIENT MANDATORY EXCLUSIVE LOCKS:
+--------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
