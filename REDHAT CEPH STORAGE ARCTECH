@@ -188,6 +188,226 @@ Ceph will still preserve data even if two OSDs fail. However, it will interrupt 
 
 2.8. CEPH OBJECTSTORE:
 ----------------------------
+- ObjectStore provides a low-level interface to an OSD’s raw block device
+- When a client reads or writes data, it interacts with the ObjectStore interface.
+- An object stored in the storage cluster has a unique identifier, object data and metadata. 
+
+Ceph implements several concrete methods for storing data:
+FileStore: A production grade implementation using a filesystem to store object data.
+BlueStore: A production grade implementation using a raw block device to store object data.
+Memstore: A developer implementation for testing read/write operations directly in RAM.
+K/V Store: An internal implementation for Ceph’s use of key/value databases.
+
+Since administrators will generally only address BlueStore,
+
+2.9. CEPH BLUESTORE:
+---------------------
+- BlueStore is the next generation storage implementation for Ceph.
+- Ceph reveals some of the limitations of the FileStore storage implementation. 
+- Blue store beats all limitaations of filestore.
+
+BlueStore stores data as:
+--------------------------
+Object Data
+Block Database
+Write-ahead Log
+
+2.10. CEPH SELF MANAGEMENT OPERATIONS:
+---------------------------------------
+- Ceph clusters perform a lot of self monitoring and management operations automatically.
+- For example, Ceph OSDs can check the cluster health and report back to the Ceph monitors.
+  By using CRUSH to assign objects to placement groups and placement groups to a set of OSDs, 
+  Ceph OSDs can use the CRUSH algorithm to rebalance the cluster or recover from OSD failures dynamically.
+
+2.11. CEPH HEARTBEAT:
+----------------------
+Ceph OSDs join a cluster and report to Ceph Monitors on their status. 
+At the lowest level, the Ceph OSD status is up or down reflecting whether or not it is running and able to service Ceph client requests. 
+If a Ceph OSD is down and in the Ceph storage cluster, this status may indicate the failure of the Ceph OSD. 
+If a Ceph OSD is not running for example, it crashes—​the Ceph OSD cannot notify the Ceph Monitor that it is down. 
+The Ceph Monitor can ping a Ceph OSD daemon periodically to ensure that it is running.
+However, heartbeating also empowers Ceph OSDs to determine if a neighboring OSD is down, to update the cluster map and to report it to the Ceph Monitors.
+This means that Ceph Monitors can remain light weight processes.
+
+2.12.CEPH PEERING
+--------------------
+Ceph stores copies of placement groups on multiple OSDs. Each copy of a placement group has a status. 
+These OSDs "peer" or check each other to ensure that they agree on the status of each copy of the PG. 
+Peering issues usually resolve themselves.
+
+
+2.13. CEPH REBALANCING AND RECOVERY:
+--------------------------------------
+When an administrator adds a Ceph OSD to a Ceph storage cluster, Ceph updates the cluster map.
+This change to the cluster map also changes object placement, because the modified cluster map changes an input for the CRUSH calculations. 
+
+2.14. CEPH DATA INTEGRITY:
+--------------------------
+As part of maintaining data integrity, Ceph provides numerous mechanisms to guard against bad disk sectors and bit rot.
+
+Scrubbing: Ceph OSD Daemons can scrub objects within placement groups. 
+That is, Ceph OSD Daemons can compare object metadata in one placement group with its replicas in placement groups stored on other OSDs. 
+Scrubbing—​usually performed daily—​catches bugs or storage errors. Ceph OSD Daemons also perform deeper scrubbing by comparing data in objects bit- for-bit. 
+Deep scrubbing—​usually performed weekly—​finds bad sectors on a drive that weren’t apparent in a light scrub.
+
+CRCChecks:InRedHatCephStorage4whenusing BlueStore,Cephcanensuredataintegrity by conducting a cyclical redundancy check (CRC) on write operations; 
+then, store the CRC value in the block database. On read operations, Ceph can retrieve the CRC value from the block database and compare 
+it with the generated CRC of the retrieved data to ensure data integrity instantly.
+
+
+2.15.CEPH HIGH AVAILABILITY
+------------------------------
+In addition to the high scalability enabled by the CRUSH algorithm, Ceph must also maintain high availability. 
+This means that Ceph clients must be able to read and write data even when the cluster is in a degraded state, or when a monitor fails.
+
+2.16. CLUSTERING THE CEPH MONITOR
+---------------------------------
+Before Ceph clients can read or write data, they must contact a Ceph Monitor to obtain the most recent copy of the cluster map. 
+A Red Hat Ceph Storage cluster can operate with a single monitor; however, this introduces a single point of failure. 
+That is, if the monitor goes down, Ceph clients cannot read or write data.
+
+2.17. CEPH HIGH AVAILABILITY
+-----------------------------
+In addition to the high scalability enabled by the CRUSH algorithm, Ceph must also maintain high availability. 
+This means that Ceph clients must be able to read and write data even when the cluster is in a degraded state, or when a monitor fails.
+
+=======================================================================================================================================================================
+
+CHAPTER-3: CEPH CLIENT COMPONENTS:
+===================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
