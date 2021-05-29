@@ -1,0 +1,123 @@
+                                                 REDHAT CEPH STORAGE CLUSTER ADMIN TASKS
+===================================================================================================================================================================
+CHAPTER 1. UNDERSTANDING PROCESS MANAGEMENT FOR CEPH:
+*******************************************************
+1.STARTING, STOPPING, AND RESTARTING THE CEPH DAEMONS:
+------------------------------------------------------
+On Ceph Monitor nodes:
+
+systemctl start ceph-mon.target
+systemctl status ceph-mon.target
+systemctl stop ceph-mon.target
+systemctl restart ceph-mon.target
+
+On Ceph Manager nodes:
+
+systemctl start ceph-mgr.target
+systemctl status ceph-mgr.target
+systemctl stop ceph-mgr.target
+systemctl restart ceph-mgr.target
+
+On Ceph OSD nodes:
+
+systemctl start ceph-osd.target
+systemctl status ceph-osd.target
+systemctl stop ceph-osd.target
+systemctl restart ceph-osd.target
+
+On Ceph Object Gateway nodes:
+
+systemctl start ceph-radosgw.target
+systemctl status ceph-radosgw.target
+systemctl stop ceph-radosgw.target
+systemctl restart ceph-radosgw.target
+
+*********************************************************************************************************************************************************************
+CHAPTER 2. MONITORING A CEPH STORAGE CLUSTER:
+**********************************************
+1.HIGH-LEVEL MONITORING OF A CEPH STORAGE CLUSTER:
+---------------------------------------------------
+Using the Ceph command interface interactively:
+
+# ceph ceph> health
+ceph> status
+ceph> quorum_status 
+ceph> mon_status
+
+Checking the storage cluster health:
+
+# ceph health
+# ceph -c /path/to/conf -k /path/to/keyring health
+
+Watching storage cluster events:
+
+# ceph -w
+
+Understanding the storage clusters usage stats:
+
+# ceph df
+
+Understanding the OSD usage stats:
+
+# ceph osd df
+
+Checking the Red Hat Ceph Storage cluster status:
+
+# ceph status
+
+Checking the Ceph Monitor status:
+
+# ceph mon stat
+# ceph mon dump
+# ceph quorum_status -f json-pretty
+
+Understanding the Ceph OSD status:
+
+# ceph osd stat
+# ceph osd dump
+# ceph osd tree        -No of OSD's
+# systemctl start ceph-osd@OSD_ID      --------To Start OSD if its down
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------
+2. LOW-LEVEL MONITORING OF A CEPH STORAGE CLUSTER:
+--------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
